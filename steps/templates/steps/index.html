@@ -1,180 +1,123 @@
 <!DOCTYPE html>
 {% load staticfiles %}
 <html>
-<head>
-  <title>Steps!</title>
-  <!-- jQuery -->
-  <script src="{% static 'steps/js/jquery-2.2.0.min.js' %}"></script>
-  <script src="{% static 'steps/js/index.js' %}"></script>
-  <script src="{% static 'steps/js/verify.notify.min.js' %}"></script>
-    
-  <link rel="stylesheet" href="{% static 'steps/css/bootstrap.min.superhero.css' %}" type="text/css">
+    <head>
+      <title>Steps!</title>
+      <!-- jQuery -->
+      <script src="{% static 'steps/js/jquery-2.2.0.min.js' %}"></script>
+      <script src="{% static 'steps/js/index.js' %}"></script>
+      <script src="{% static 'steps/js/verify.notify.min.js' %}"></script>
 
-  <script src="{% static 'steps/js/bootstrap.min.js' %}"></script>
-  <link href="{% static 'steps/css/index.css' %}" rel="stylesheet" type="text/css">
-</head>
-<body>
-  <nav class="navbar navbar-default navbar-fixed-top">
-  <div class="container">
-    <!-- Brand and toggle get grouped for better mobile display -->
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <a class="navbar-brand" href="{% url 'index' %}">Order steps</a>
-    </div>
+      <link rel="stylesheet" href="{% static 'steps/css/bootstrap.min.superhero.css' %}" type="text/css">
 
-    <!-- Collect the nav links, forms, and other content for toggling -->
-    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-      <ul class="nav navbar-nav">
-        {% if current_page == "home" %}
-          <li class="active"><a href="{% url 'index' %}">Home<span class="sr-only">(current)</span></a></li>
-        {% else %}
-          <li><a href="{% url 'index' %}">Home<span class="sr-only">(current)</span></a></li>
-        {% endif %}
-      </ul>
-      <form class="navbar-form navbar-left" role="search">
-        <div class="form-group">
-          <input type="text" class="form-control" placeholder="Search">
+      <script src="{% static 'steps/js/bootstrap.min.js' %}"></script>
+      <link href="{% static 'steps/css/index.css' %}" rel="stylesheet" type="text/css">
+    </head>
+    <body>
+        <nav class="navbar navbar-default navbar-fixed-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="{% url 'index' %}">Steps!</a>
+                </div>
+
+
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav navbar-right">
+                        {% if loggedin %}
+                        <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">{{user.username}} | {{ user.email }}<span class="caret"></span></a>
+                        <ul class="dropdown-menu" role="menu">
+                            <li><a href="{% url 'logout' %}">Logout</a></li>
+                        </ul>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <div class="after-nav container">
+            <div class="forms">
+                {% block content %}
+
+                    {% if errors %}
+                        <p>Your username and password didn't match. Please try again.</p>
+                    {% endif %}
+
+                    {% if not loggedin %}
+                        <div class="row">
+                            <form role="form" class="formclass" method="post" id="loginform" enctype="multipart/form-data" action="{% url 'login' %}">
+                                {% csrf_token %}
+                                <p>
+                                    <div class="form-group col-lg-4 col-lg-offset-4 col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3 col-xs-6 col-xs-offset-3">
+                                        <label for='user_id'>User ID</label>
+                                        <input type="text" name="user_id" class="form-control" placeholder="user ID" data-validate="required"/>
+                                    </div>
+                                </p>
+                                <p>
+                                    <div class="form-group col-lg-4 col-lg-offset-4 col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3 col-xs-6 col-xs-offset-3">
+                                        <label for='password'>Password</label>
+                                        <input type="password" name="password" class="form-control" placeholder="password" data-validate="required"/>
+                                    </div>
+                                </p>
+                                <p>
+                                    <div class="form-group col-lg-4 col-lg-offset-4 col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3 col-xs-6 col-xs-offset-3">
+                                        <input type="submit" value="login" class="form-control btn btn-md btn-info"/>
+                                        <input type="hidden" name="next" value="{{ next }}" />
+                                    </div>
+                                </p>
+                            </form>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-lg-4 col-lg-offset-4 col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3 col-xs-6 col-xs-offset-3">
+                                <hr>
+                                <div class="createaccount">Don't have an account? Create one below</div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <form role="form" id="signupform"class="formclass" method="post" enctype="multipart/form-data" method="post" action="{% url 'signup' %}">
+                                {% csrf_token %}
+                                <p>
+                                    <div class="form-group col-lg-4 col-lg-offset-4 col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3 col-xs-6 col-xs-offset-3">
+                                        <label for='user_id'>User ID</label>
+                                        <input type="text" name="user_id" class="form-control" placeholder="user ID" data-validate="required"/>
+                                    </div>
+                                </p>
+                                <p>
+                                    <div class="form-group col-lg-4 col-lg-offset-4 col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3 col-xs-6 col-xs-offset-3">
+                                        <label for='email'>Email</label>
+                                        <input type="text" name="email" class="form-control" placeholder="email" data-validate="required,email"/>
+                                    </div>
+                                </p>
+                                <p>
+                                    <div class="form-group col-lg-4 col-lg-offset-4 col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3 col-xs-6 col-xs-offset-3">
+                                        <label for='password'>Password</label>
+                                        <input type="password" name="password" class="form-control" placeholder="password" data-validate="required"/>
+                                    </div>
+                                </p>
+                                <div class="form-group col-lg-4 col-lg-offset-4 col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3 col-xs-6 col-xs-offset-3">
+                                    <button type="submit" class="btn btn-md btn-success form-control" id="signup">Create Account</button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-lg-4 col-lg-offset-4 col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3 col-xs-6 col-xs-offset-3">
+                                <div class="createaccount">Once you signup, you will be redirected to this page to login</div>
+                            </div>
+                        </div>
+                    {% else %}
+
+                        <h1>Welcome, {{user.username}}</h1>
+                        <br>
+                    {% endif %}
+                {% endblock %}
+            </div>
         </div>
-        <button type="submit" class="btn btn-default">Search</button>
-      </form>
-      <ul class="nav navbar-nav navbar-right">
-        {% if loggedin %}
-        <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">{{user.username}} <span class="caret"></span></a>
-          <ul class="dropdown-menu" role="menu">
-            <li><a href="#">Profile</a></li>
-            <li class="divider"></li>
-            <li><a href="{% url 'logout' %}">Logout</a></li>
-          </ul>
-        </li>
-        {% endif %}
-      </ul>
-    </div><!-- /.navbar-collapse -->
-  </div><!-- /.container-fluid -->
-</nav>
-
-<div class="after-nav container">
-{% block content %}
-
-{% if errors %}
-<p>Your username and password didn't match. Please try again.</p>
-{% endif %}
-
-{% if not loggedin %}
-<div class="row">
-  <form role="form" class="formclass" method="post" id="loginform" enctype="multipart/form-data" action="{% url 'login' %}">
-  {% csrf_token %}
-  <p>
-    <div class="form-group col-lg-4 col-lg-offset-4 col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3 col-xs-6 col-xs-offset-3">
-      <label for='username'>Username</label>
-      <input type="text" name="username" class="form-control" placeholder="username" data-validate="required"/>
-    </div>
-  </p>
-  <p>
-    <div class="form-group col-lg-4 col-lg-offset-4 col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3 col-xs-6 col-xs-offset-3">
-      <label for='password'>Password</label>
-      <input type="password" name="password" class="form-control" placeholder="password" data-validate="required"/>
-    </div>
-  </p>
-  <p>
-    <div class="form-group col-lg-4 col-lg-offset-4 col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3 col-xs-6 col-xs-offset-3">
-      <input type="submit" value="login" class="form-control btn btn-md btn-info"/>
-      <input type="hidden" name="next" value="{{ next }}" />
-    </div>
-  </form>
-</div>
-<div class="row">
-  <div class="form-group col-lg-4 col-lg-offset-4 col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3 col-xs-6 col-xs-offset-3">
-    <hr>
-    <div class="createaccount">Don't have an account? Create one below</div>
-  </div>
-</div>
-<div class="row">
-  <form role="form" id="signupform"class="formclass" method="post" enctype="multipart/form-data" method="post" action="{% url 'signup' %}">
-  {% csrf_token %}
-  <p>
-    <div class="form-group col-lg-4 col-lg-offset-4 col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3 col-xs-6 col-xs-offset-3">
-      <label for='username'>Username</label>
-      <input type="text" name="username" class="form-control" placeholder="username" data-validate="required"/>
-    </div>
-  </p>
-  <p>
-    <div class="form-group col-lg-4 col-lg-offset-4 col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3 col-xs-6 col-xs-offset-3">
-      <label for='email'>Email</label>
-      <input type="text" name="email" class="form-control" placeholder="email" data-validate="required,email"/>
-    </div>
-  </p>
-  <p>
-    <div class="form-group col-lg-4 col-lg-offset-4 col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3 col-xs-6 col-xs-offset-3">
-      <label for='password'>Password</label>
-      <input type="password" name="password" class="form-control" placeholder="password" data-validate="required"/>
-    </div>
-  </p>
-  <div class="form-group col-lg-4 col-lg-offset-4 col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3 col-xs-6 col-xs-offset-3">
-    <button type="button" class="btn btn-md btn-success form-control" id="signup">Create Account</button>
-  </div>
-  </form>
-</div>
-<div class="row">
-  <div class="form-group col-lg-4 col-lg-offset-4 col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3 col-xs-6 col-xs-offset-3">
-    <div class="createaccount">Once you signup, you will be redirected to this page to login</div>
-  </div>
-</div>
-{% else %}
-
-<h1>Welcome, {{user.username}}</h1>
-<br>
-{% if customers %}
-  <div class="row">
-    <div class="col-md-9">
-      <h3>Current Clients/Customers</h3>
-    </div>
-    <div class="col-md-3">
-      <button class="btn btn-primary" id="createCustomer">Create Customer</button>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-md-6">
-      {% include "steps/customerForm.html" %}
-    </div>
-  </div>
-  <br><br>
-  <div class="col-md-2 sidebar">
-    <ul class="nav nav-pills nav-stacked">
-    {% for c in customers %}
-      {% if c.id = customers.0.id %}
-        <li class="active"><a href="#{{c.id}}" data-toggle="tab">{{c.id}} - {{c.name}}</a></li>
-      {% else %}
-        <li><a href="#{{c.id}}" data-toggle="tab">{{c.id}} - {{c.name}}</a></li>
-      {% endif %}
-    {% endfor %}
-    </ul>
-  </div>
-  <div class="tab-content col-md-10">
-    {% include "steps/customerDetails2.html" %}
-  </div>
-{% else %}
-  <div class="row">
-    <div class="col-md-9">
-      <h4>There are currently no customers orders</h4>
-    </div>
-    <div class="col-md-3">
-      <button class="btn btn-primary" id="createCustomer">Create Customer</button>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-md-6">
-      {% include "steps/customerForm.html" %}
-    </div>
-  </div>
-{% endif %}
-{% endif %}
-{% endblock %}
-</div>
-<body>
+    <body>
 </html>

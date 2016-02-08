@@ -4,4 +4,7 @@ from steps import views
 
 urlpatterns = [
     url('^$', views.index, name='index'),
+    url(r'^login/$', views.login_view, name='login'),
+    url(r'^logout/$', views.logout_view, name='logout'),
+    url(r'^signup/$', views.signup, name='signup'),
 ]
