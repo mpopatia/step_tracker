@@ -68,8 +68,9 @@
                                 </p>
                                 <p>
                                     <div class="form-group col-lg-4 col-lg-offset-4 col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3 col-xs-6 col-xs-offset-3">
-                                        <input type="submit" value="login" class="form-control btn btn-md btn-info"/>
-                                        <input type="hidden" name="next" value="{{ next }}" />
+{#                                        <input type="submit" value=Login" class="form-control btn btn-md btn-info"/>#}
+                                        <button type="submit" class="btn btn-md btn-info form-control" id="login">Login</button>
+{#                                        <input type="hidden" name="next" value="{{ next }}" />#}
                                     </div>
                                 </p>
                             </form>
@@ -113,8 +114,23 @@
                         </div>
                     {% else %}
 
-                        <h1>Welcome, {{user.username}}</h1>
-                        <br>
+                        {% if message %}
+                            <div class="alert alert-success" role="alert">{{ message }}</div>
+                        {% else %}
+                            <form role="form" class="formclass" method="get" id="stepform" enctype="multipart/form-data" onsubmit="store_steps()">
+                                <p>
+                                    <div class="form-group col-lg-4 col-lg-offset-4 col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3 col-xs-6 col-xs-offset-3">
+                                        <label for='step_count'>Steps for {{ day }} i.e. {{ time }}</label>
+                                        <input id='step_count' type="text" name="step_count" class="form-control" placeholder="step count" data-validate="required,number"/>
+                                    </div>
+                                </p>
+                                <p>
+                                    <div class="form-group col-lg-4 col-lg-offset-4 col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3 col-xs-6 col-xs-offset-3">
+                                        <button type="submit" class="btn btn-md btn-info form-control" id="store_step">Submit</button>
+                                    </div>
+                                </p>
+                            </form>
+                        {% endif %}
                     {% endif %}
                 {% endblock %}
             </div>

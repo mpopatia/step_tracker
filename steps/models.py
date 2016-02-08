@@ -7,5 +7,7 @@ from django.db import models
 
 class StepCount(models.Model):
     owner = models.ForeignKey(User)
-    dateCreated = models.DateTimeField(auto_now_add=True)
+    steps = models.IntegerField(default=0)
+    dateCreated = models.DateField()
+    dateTimeCreated = models.DateTimeField(auto_now_add=True)
 

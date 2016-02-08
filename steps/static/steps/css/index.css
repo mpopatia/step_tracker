@@ -83,3 +83,8 @@
 .forms {
     padding-top: 150px;
 }
+
+
+label {
+    font-size:18px;
+}
