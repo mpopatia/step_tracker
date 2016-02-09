@@ -87,10 +87,8 @@ def get_user_steps(user, date):
     s = StepCount.objects.filter(owner=user, dateCreated=date)
     if s:
         s = s[0]
-        print "Already exists"
         return s
     else:
-        print "Need to create a new one"
         return None
 
 
@@ -110,10 +108,13 @@ def get_date(threshold):
 # send emails to all groups
 def send_emails(request):
     one, two, three = separate()
-    print one
-    to_email_one = email_one(one)
-    print to_email_one
+    # print one
+    # to_email_one = email_one(one)
+    # print to_email_one
     # send_mass_mail(to_email_one)
+    to_email_two = email_two(two)
+    print "EMAILING", to_email_two
+    # send_mass_mail(to_email_two)
     return HttpResponse("Done!")
 
 
@@ -136,7 +137,19 @@ def separate():
         elif user_id >= 201 and user_id <= 300:
             three.append(u)
 
+    two = create_pairs(two)
     return one, two, three
+
+
+# create pairs from list of users
+def create_pairs(users):
+    ans = []
+    ids = map(lambda x: (int(x.username), x), users)
+    ids.sort(key=lambda tup: tup[0])
+    for i in xrange(0,len(ids),2):
+        ans.append((ids[i][1], ids[i+1][1]))
+
+    return ans
 
 
 # generates email responses for group 1
@@ -151,9 +164,11 @@ def email_one(users):
             message = "Dear User " + u.username + ", you did not enter data for " + date_str + "."
         else:
             if s.steps >= 10000:
-                message = "Congratulations User " + u.username + ", you completed your goal with a total of " + str(s.steps) + " for " + date_str +"."
+                message = "Congratulations User " + u.username + ", you completed your goal with a total of " + str(s.steps) + " steps for " + date_str +"."
             else:
-                message = "Dear User "+ u.username + ", you did not complete your goal with a total of just " + str(s.steps) + " for " + date_str +"."
+                message = "Dear User "+ u.username + ", you did not complete your goal with a total of just " + str(s.steps) + " steps for " + date_str +"."
+
+        data.append((subject, message, settings.EMAIL_HOST_USER, [u.email]))
 
     data = tuple(data)
     return data
@@ -166,14 +181,66 @@ def email_two(users):
     date_str = date.strftime('%d/%m/%Y')
     subject = "Steps update for " + date_str
     for u in users:
-        s = get_user_steps(u, date)
-        if s is None:
-            message = "Dear User " + u.username + ", you did not enter data for " + date_str + "."
-        else:
-            if s.steps >= 10000:
-                message = "Congratulations User " + u.username + ", you completed your goal with a total of " + str(s.steps) + " for " + date_str +"."
+        u1 = u[0]
+        u2 = u[1]
+        s1 = get_user_steps(u1, date)
+        s2 = get_user_steps(u2, date)
+
+        if s1 is None:
+            message = "Dear User " + u1.username + ", you did not enter data for " + date_str + "."
+            data.append((subject, message, settings.EMAIL_HOST_USER, [u1.email]))
+            if s2 is None:
+                message = "Dear User " + u2.username + ", you did not enter data for " + date_str + "."
+                data.append((subject, message, settings.EMAIL_HOST_USER, [u2.email]))
             else:
-                message = "Dear User "+ u.username + ", you did not complete your goal with a total of just " + str(s.steps) + " for " + date_str +"."
+                if s2.steps >= 10000:
+                    message = "Congratulations User " + u2.username + ", you are the winner and you have completed your goal with a total of " + str(s2.steps) + " steps for " + date_str +"."
+                    data.append((subject, message, settings.EMAIL_HOST_USER, [u2.email]))
+                else:
+                    message = "Congratulations User "+ u2.username + ", you are the winner but you did not complete your goal with a total of just " + str(s2.steps) + " steps for " + date_str +"."
+                    data.append((subject, message, settings.EMAIL_HOST_USER, [u2.email]))
+        else:
+            if s2 is None:
+                message = "Dear User " + u2.username + ", you did not enter data for " + date_str + "."
+                data.append((subject, message, settings.EMAIL_HOST_USER, [u2.email]))
+                if s1.steps >= 10000:
+                    message = "Congratulations User " + u1.username + ", you are the winner and you have completed your goal with a total of " + str(s1.steps) + " steps for " + date_str +"."
+                    data.append((subject, message, settings.EMAIL_HOST_USER, [u1.email]))
+                else:
+                    message = "Congratulations User "+ u1.username + ", you are the winner but you did not complete your goal with a total of just " + str(s1.steps) + " steps for " + date_str +"."
+                    data.append((subject, message, settings.EMAIL_HOST_USER, [u1.email]))
+            else:
+                if s1.steps > s2.steps:
+                    if s1.steps >= 10000:
+                        message = "Congratulations User " + u1.username + ", you are the winner and you have completed your goal with a total of " + str(s1.steps) + " steps for " + date_str +"."
+                        data.append((subject, message, settings.EMAIL_HOST_USER, [u1.email]))
+                    if s1.steps < 10000:
+                        message = "Congratulations User "+ u1.username + ", you are the winner but you did not complete your goal with a total of just " + str(s1.steps) + " steps for " + date_str +"."
+                        data.append((subject, message, settings.EMAIL_HOST_USER, [u1.email]))
+
+                    if s2.steps >= 10000:
+                        message = "Dear User " + u2.username + ", you are the loser but you have completed your goal with a total of " + str(s2.steps) + " steps for " + date_str +"."
+                        data.append((subject, message, settings.EMAIL_HOST_USER, [u2.email]))
+                    if s2.steps < 10000:
+                        message = "Dear User "+ u2.username + ", you are the loser and you did not complete your goal with a total of just " + str(s2.steps) + " steps for " + date_str +"."
+                        data.append((subject, message, settings.EMAIL_HOST_USER, [u2.email]))
+                else:
+                    if s1.steps >= 10000:
+                        message = "Dear User " + u1.username + ", you are the loser but you have completed your goal with a total of " + str(s1.steps) + " steps for " + date_str +"."
+                        data.append((subject, message, settings.EMAIL_HOST_USER, [u1.email]))
+                    if s1.steps < 10000:
+                        message = "Dear User "+ u1.username + ", you are the loser and you did not complete your goal with a total of just " + str(s1.steps) + " steps for " + date_str +"."
+                        data.append((subject, message, settings.EMAIL_HOST_USER, [u1.email]))
+
+                    if s2.steps >= 10000:
+                        message = "Congratulations User " + u2.username + ", you are the winner and you have completed your goal with a total of " + str(s2.steps) + " steps for " + date_str +"."
+                        data.append((subject, message, settings.EMAIL_HOST_USER, [u2.email]))
+                    if s2.steps < 10000:
+                        message = "Congratulations User "+ u2.username + ", you are the winner but you did not complete your goal with a total of just " + str(s2.steps) + " steps for " + date_str +"."
+                        data.append((subject, message, settings.EMAIL_HOST_USER, [u2.email]))
 
     data = tuple(data)
     return data
+
+
+
