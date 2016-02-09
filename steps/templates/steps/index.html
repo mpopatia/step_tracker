@@ -117,11 +117,14 @@
                         {% if message %}
                             <div class="alert alert-success" role="alert">{{ message }}</div>
                         {% else %}
-                            <form role="form" class="formclass" method="get" id="stepform" enctype="multipart/form-data" onsubmit="store_steps()">
+                            <form role="form" class="formclass" method="get" id="stepform" enctype="multipart/form-data" action="{% url 'store_steps' %}">
                                 <p>
                                     <div class="form-group col-lg-4 col-lg-offset-4 col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3 col-xs-6 col-xs-offset-3">
                                         <label for='step_count'>Steps for {{ day }} i.e. {{ time }}</label>
-                                        <input id='step_count' type="text" name="step_count" class="form-control" placeholder="step count" data-validate="required,number"/>
+                                        {% if steps %}
+                                            <div class="alert alert-danger" role="alert"><strong>Warning:</strong> You have already entered <strong>{{ steps }}</strong> step(s) for the above date. The count will be overwritten if you submit again.</div>
+                                        {% endif %}
+                                        <input type="text" name="step_count" class="form-control" placeholder="step count" data-validate="required,number"/>
                                     </div>
                                 </p>
                                 <p>

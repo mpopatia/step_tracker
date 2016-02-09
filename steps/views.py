@@ -6,35 +6,32 @@ from django.utils.html import escape, strip_tags
 from django.contrib.auth.models import User
 from datetime import datetime, timedelta, date
 from models import StepCount
-import json
+
 
 # Create your views here.
 
 
-def get_date(threshold):
-    now = datetime.now()
-    today_threshold_am = now.replace(hour=threshold, minute=0, second=0, microsecond=0)
-    if now < today_threshold_am:
-        time = date.today() - timedelta(days=1)
-        day = "yesterday"
-    else:
-        time = date.today()
-        day = "today"
-
-    return time, day
-
-
+# renders the index page
 def index(request):
     time, day = get_date(10)
     time = time.strftime('%d/%m/%Y')
-    return render(request, 'steps/index.html', {"loggedin": request.user.is_authenticated, "time": time, "day": day})
+
+    s = get_user_steps(request)
+    if s is None:
+        steps = ""
+    else:
+        steps = str(s.steps)
+
+    return render(request, 'steps/index.html', {"loggedin": request.user.is_authenticated, "time": time, "day": day, "steps": steps})
 
 
+# logs the user out
 def logout_view(request):
     logout(request)
     return HttpResponseRedirect(reverse('index'))
 
 
+# logs the user in
 def login_view(request):
     user_id = escape(strip_tags(request.POST['user_id']))
     password = escape(strip_tags(request.POST['password']))
@@ -49,6 +46,7 @@ def login_view(request):
         return HttpResponse("Invalid login")
 
 
+# creates a new user
 def signup(request):
     user_id = escape(strip_tags(request.POST['user_id']))
     email = escape(strip_tags(request.POST['email']))
@@ -57,20 +55,50 @@ def signup(request):
     return HttpResponseRedirect(reverse('index'))
 
 
+# renders the success notification page
+def success(request):
+    message = "Your response has been recorded. Thank you."
+    return render(request, 'steps/success.html', {"loggedin": request.user.is_authenticated, "message": message})
+
+
+# stores the step count for the user
 def store_steps(request):
     steps = int(escape(strip_tags(request.GET['step_count'])))
     print "STEPS:",steps
+    (date, day) = get_date(10)
+    s = get_user_steps(request)
+    if s is None:
+        s = StepCount(owner=request.user, dateCreated=date, steps=steps)
+        s.save()
+    else:
+        s.steps = steps
+        s.save()
+
+    return HttpResponseRedirect(reverse('success'))
+
+
+# returns the user object for the current date if one exists
+def get_user_steps(request):
     (date, day) = get_date(10)
     s = StepCount.objects.filter(owner=request.user, dateCreated=date)
     if s:
         s = s[0]
         print "Already exists"
-        s.steps = steps
-        s.save()
+        return s
     else:
-        print "Creating a new one"
-        s = StepCount(owner=request.user, dateCreated=date, steps=steps)
-        s.save()
+        print "Need to create a new one"
+        return None
 
-    message = "Your response has been recorded. Thank you."
-    return HttpResponse(json.dumps(message), content_type = "application/json")
+
+# returns the date for which data is being entered
+def get_date(threshold):
+    now = datetime.now()
+    today_threshold_am = now.replace(hour=threshold, minute=0, second=0, microsecond=0)
+    if now < today_threshold_am:
+        time = date.today() - timedelta(days=1)
+        day = "yesterday"
+    else:
+        time = date.today()
+        day = "today"
+
+    return time, day
