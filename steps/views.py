@@ -6,6 +6,8 @@ from django.utils.html import escape, strip_tags
 from django.contrib.auth.models import User
 from datetime import datetime, timedelta, date
 from models import StepCount
+from django.core.mail import send_mass_mail
+from django.conf import settings
 
 
 # Create your views here.
@@ -16,11 +18,14 @@ def index(request):
     date, day = get_date(10)
     time = date.strftime('%d/%m/%Y')
 
-    s = get_user_steps(request.user, date)
-    if s is None:
-        steps = ""
+    if request.user.is_authenticated():
+        s = get_user_steps(request.user, date)
+        if s is None:
+            steps = ""
+        else:
+            steps = str(s.steps)
     else:
-        steps = str(s.steps)
+        steps = ""
 
     return render(request, 'steps/index.html', {"loggedin": request.user.is_authenticated, "time": time, "day": day, "steps": steps})
 
@@ -101,3 +106,74 @@ def get_date(threshold):
         day = "today"
 
     return time, day
+
+# send emails to all groups
+def send_emails(request):
+    one, two, three = separate()
+    print one
+    to_email_one = email_one(one)
+    print to_email_one
+    # send_mass_mail(to_email_one)
+    return HttpResponse("Done!")
+
+
+# Group 1: Control Group
+# Group 2: Inter-pair competition
+# Group 3: Competition amongst all pairs
+
+# separate the groups
+def separate():
+    one = []
+    two = []
+    three = []
+    users = User.objects.all()
+    for u in users:
+        user_id = int(u.username)
+        if user_id >= 11 and user_id <= 100:
+            one.append(u)
+        elif user_id >= 101 and user_id <= 200:
+            two.append(u)
+        elif user_id >= 201 and user_id <= 300:
+            three.append(u)
+
+    return one, two, three
+
+
+# generates email responses for group 1
+def email_one(users):
+    data = []
+    (date, day) = get_date(10)
+    date_str = date.strftime('%d/%m/%Y')
+    subject = "Steps update for " + date_str
+    for u in users:
+        s = get_user_steps(u, date)
+        if s is None:
+            message = "Dear User " + u.username + ", you did not enter data for " + date_str + "."
+        else:
+            if s.steps >= 10000:
+                message = "Congratulations User " + u.username + ", you completed your goal with a total of " + str(s.steps) + " for " + date_str +"."
+            else:
+                message = "Dear User "+ u.username + ", you did not complete your goal with a total of just " + str(s.steps) + " for " + date_str +"."
+
+    data = tuple(data)
+    return data
+
+
+# generates email responses for group 2
+def email_two(users):
+    data = []
+    (date, day) = get_date(10)
+    date_str = date.strftime('%d/%m/%Y')
+    subject = "Steps update for " + date_str
+    for u in users:
+        s = get_user_steps(u, date)
+        if s is None:
+            message = "Dear User " + u.username + ", you did not enter data for " + date_str + "."
+        else:
+            if s.steps >= 10000:
+                message = "Congratulations User " + u.username + ", you completed your goal with a total of " + str(s.steps) + " for " + date_str +"."
+            else:
+                message = "Dear User "+ u.username + ", you did not complete your goal with a total of just " + str(s.steps) + " for " + date_str +"."
+
+    data = tuple(data)
+    return data

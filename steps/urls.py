@@ -9,4 +9,5 @@ urlpatterns = [
     url(r'^signup/$', views.signup, name='signup'),
     url(r'^store_steps/$', views.store_steps, name='store_steps'),
     url(r'^success/$', views.success, name='success'),
+    url(r'^send_emails/$', views.send_emails, name='send_emails'),
 ]
