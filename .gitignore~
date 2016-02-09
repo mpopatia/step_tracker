@@ -1,1 +1,2 @@
-scure.py
+*.pyc
+secure.py
