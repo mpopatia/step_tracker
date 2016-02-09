@@ -13,10 +13,10 @@ from models import StepCount
 
 # renders the index page
 def index(request):
-    time, day = get_date(10)
-    time = time.strftime('%d/%m/%Y')
+    date, day = get_date(10)
+    time = date.strftime('%d/%m/%Y')
 
-    s = get_user_steps(request)
+    s = get_user_steps(request.user, date)
     if s is None:
         steps = ""
     else:
@@ -66,7 +66,7 @@ def store_steps(request):
     steps = int(escape(strip_tags(request.GET['step_count'])))
     print "STEPS:",steps
     (date, day) = get_date(10)
-    s = get_user_steps(request)
+    s = get_user_steps(request.user, date)
     if s is None:
         s = StepCount(owner=request.user, dateCreated=date, steps=steps)
         s.save()
@@ -78,9 +78,8 @@ def store_steps(request):
 
 
 # returns the user object for the current date if one exists
-def get_user_steps(request):
-    (date, day) = get_date(10)
-    s = StepCount.objects.filter(owner=request.user, dateCreated=date)
+def get_user_steps(user, date):
+    s = StepCount.objects.filter(owner=user, dateCreated=date)
     if s:
         s = s[0]
         print "Already exists"
