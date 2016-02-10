@@ -121,7 +121,30 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
+# Honor the 'X-Forwarded-Proto' header for request.is_secure()
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Allow all host headers
+ALLOWED_HOSTS = ['*']
+
+# Static asset configuration
+STATIC_ROOT = 'staticfiles'
 STATIC_URL = '/static/'
+
+# if 'ONHEROKU' in os.environ:
+#     DEBUG = False
+
+# MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads/')
+
+# LOGIN_REDIRECT_URL = '/'
+
+
+
+
+# Parse database configuration from $DATABASE_URL
+if 'ONHEROKU' in os.environ:
+    import dj_database_url
+    DATABASES['default'] =  dj_database_url.config(default='postgres://kulmwmbwfznqiz:tFOQZjHxzkc5SAJs8cyy0KtZds@ec2-107-20-136-89.compute-1.amazonaws.com:5432/dcs38705okbe1u')
 
 
 EMAIL_HOST = 'smtp.gmail.com'
