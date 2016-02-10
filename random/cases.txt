@@ -1,0 +1,20 @@
+Cases for Case 2:
+	- A None and B None
+
+	- A None and B < 10k
+	- A None and B > 10k
+
+	- A > 10k and B None
+	- A < 10k and B None
+
+	- A > 10k and B > 10k and A > B
+	- A > 10k and B > 10k and A < B
+
+	- A > 10k and B < 10k and A > B
+	- A > 10k and B < 10k and A < B
+
+	- A < 10k and B > 10k and A > B
+	- A < 10k and B > 10k and A < B
+
+	- A < 10k and B < 10k and A > B
+	- A < 10k and B < 10k and A < B
