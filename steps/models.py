@@ -11,3 +11,12 @@ class StepCount(models.Model):
     dateCreated = models.DateField()
     dateTimeCreated = models.DateTimeField(auto_now_add=True)
 
+    def owner_email(self):
+        return self.owner.email
+
+
+class Tester(models.Model):
+    count = models.IntegerField(default=0)
+
+class EmailCounter(models.Model):
+    dateCreated = models.DateField()

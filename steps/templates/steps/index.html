@@ -55,19 +55,19 @@
                             <form role="form" class="formclass" method="post" id="loginform" enctype="multipart/form-data" action="{% url 'login' %}">
                                 {% csrf_token %}
                                 <p>
-                                    <div class="form-group col-lg-4 col-lg-offset-4 col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3 col-xs-6 col-xs-offset-3">
+                                    <div class="form-group col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-12 col-xs-12">
                                         <label for='user_id'>User ID</label>
                                         <input type="text" name="user_id" class="form-control" placeholder="user ID" data-validate="required"/>
                                     </div>
                                 </p>
                                 <p>
-                                    <div class="form-group col-lg-4 col-lg-offset-4 col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3 col-xs-6 col-xs-offset-3">
+                                    <div class="form-group col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-12 col-xs-12">
                                         <label for='password'>Password</label>
                                         <input type="password" name="password" class="form-control" placeholder="password" data-validate="required"/>
                                     </div>
                                 </p>
                                 <p>
-                                    <div class="form-group col-lg-4 col-lg-offset-4 col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3 col-xs-6 col-xs-offset-3">
+                                    <div class="form-group col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-12 col-xs-12">
 {#                                        <input type="submit" value=Login" class="form-control btn btn-md btn-info"/>#}
                                         <button type="submit" class="btn btn-md btn-info form-control" id="login">Login</button>
 {#                                        <input type="hidden" name="next" value="{{ next }}" />#}
@@ -76,7 +76,7 @@
                             </form>
                         </div>
                         <div class="row">
-                            <div class="form-group col-lg-4 col-lg-offset-4 col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3 col-xs-6 col-xs-offset-3">
+                            <div class="form-group col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-12 col-xs-12">
                                 <hr>
                                 <div class="createaccount">Don't have an account? Create one below</div>
                             </div>
@@ -85,30 +85,30 @@
                             <form role="form" id="signupform"class="formclass" method="post" enctype="multipart/form-data" method="post" action="{% url 'signup' %}">
                                 {% csrf_token %}
                                 <p>
-                                    <div class="form-group col-lg-4 col-lg-offset-4 col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3 col-xs-6 col-xs-offset-3">
+                                    <div class="form-group col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-12 col-xs-12">
                                         <label for='user_id'>User ID</label>
                                         <input type="text" name="user_id" class="form-control" placeholder="user ID" data-validate="required"/>
                                     </div>
                                 </p>
                                 <p>
-                                    <div class="form-group col-lg-4 col-lg-offset-4 col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3 col-xs-6 col-xs-offset-3">
+                                    <div class="form-group col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-12 col-xs-12">
                                         <label for='email'>Email</label>
                                         <input type="text" name="email" class="form-control" placeholder="email" data-validate="required,email"/>
                                     </div>
                                 </p>
                                 <p>
-                                    <div class="form-group col-lg-4 col-lg-offset-4 col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3 col-xs-6 col-xs-offset-3">
+                                    <div class="form-group col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-12 col-xs-12">
                                         <label for='password'>Password</label>
                                         <input type="password" name="password" class="form-control" placeholder="password" data-validate="required"/>
                                     </div>
                                 </p>
-                                <div class="form-group col-lg-4 col-lg-offset-4 col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3 col-xs-6 col-xs-offset-3">
+                                <div class="form-group col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-12 col-xs-12">
                                     <button type="submit" class="btn btn-md btn-success form-control" id="signup">Create Account</button>
                                 </div>
                             </form>
                         </div>
                         <div class="row">
-                            <div class="form-group col-lg-4 col-lg-offset-4 col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3 col-xs-6 col-xs-offset-3">
+                            <div class="form-group col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-12 col-xs-12">
                                 <div class="createaccount">Once you signup, you will be redirected to this page to login</div>
                             </div>
                         </div>
@@ -119,7 +119,7 @@
                         {% else %}
                             <form role="form" class="formclass" method="get" id="stepform" enctype="multipart/form-data" action="{% url 'store_steps' %}">
                                 <p>
-                                    <div class="form-group col-lg-4 col-lg-offset-4 col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3 col-xs-6 col-xs-offset-3">
+                                    <div class="form-group col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-12 col-xs-12">
                                         <label for='step_count'>Steps for {{ day }} i.e. {{ time }}</label>
                                         {% if steps %}
                                             <div class="alert alert-danger" role="alert"><strong>Warning:</strong> You have already entered <strong>{{ steps }}</strong> step(s) for the above date. The count will be overwritten if you submit again.</div>
@@ -128,7 +128,7 @@
                                     </div>
                                 </p>
                                 <p>
-                                    <div class="form-group col-lg-4 col-lg-offset-4 col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3 col-xs-6 col-xs-offset-3">
+                                    <div class="form-group col-lg-4 col-lg-offset-4 col-md-4 col-md-offset-4 col-sm-10 col-sm-offset-1 col-xs-10 col-xs-offset-1">
                                         <button type="submit" class="btn btn-md btn-info form-control" id="store_step">Submit</button>
                                     </div>
                                 </p>

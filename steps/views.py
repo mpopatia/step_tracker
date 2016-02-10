@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse
 from django.utils.html import escape, strip_tags
 from django.contrib.auth.models import User
 from datetime import datetime, timedelta, date
-from models import StepCount
+from models import StepCount, Tester, EmailCounter
 from django.core.mail import send_mass_mail
 from django.conf import settings
 
@@ -56,6 +56,8 @@ def signup(request):
     user_id = escape(strip_tags(request.POST['user_id']))
     email = escape(strip_tags(request.POST['email']))
     password = escape(strip_tags(request.POST['password']))
+    if User.objects.filter(username=user_id):
+        return HttpResponse("ID already exists. Please navigate back and choose a different ID.")
     User.objects.create_user(username=user_id, email=email, password=password)
     return HttpResponseRedirect(reverse('index'))
 
@@ -107,7 +109,17 @@ def get_date(threshold):
 
 # send emails to all groups
 def send_emails(request):
-    one, two, three = separate()
+
+    date, day = get_date(10)
+
+    emails = EmailCounter.objects.filter(dateCreated=date)
+    if emails:
+        return HttpResponse("Already sent out emails for " + date.strftime('%d/%m/%Y'))
+    else:
+        e = EmailCounter(dateCreated=date)
+        e.save()
+
+    # one, two, three = separate()
 
     # print one
     # to_email_one = email_one(one)
@@ -119,7 +131,7 @@ def send_emails(request):
     # print "EMAILING", to_email_two
     # send_mass_mail(to_email_two)
 
-    print three
+    # print three
     # to_email_two = email_two(two)
     # print "EMAILING", to_email_two
     # send_mass_mail(to_email_two)
@@ -348,3 +360,21 @@ def email_three(users):
     return data
 
 
+def increase_tester(request):
+    all = Tester.objects.all()
+    if all:
+        all = all[0]
+        all.count = all.count + 1
+        all.save()
+    else:
+        t = Tester(count=1)
+        t.save()
+    return HttpResponse("Increased!")
+
+
+def get_tester(request):
+    all = Tester.objects.all()
+    if all:
+        return HttpResponse(all[0].count)
+    else:
+        return HttpResponse(0)
