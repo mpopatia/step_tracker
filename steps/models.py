@@ -18,5 +18,6 @@ class StepCount(models.Model):
 class Tester(models.Model):
     count = models.IntegerField(default=0)
 
+
 class EmailCounter(models.Model):
     dateCreated = models.DateField()

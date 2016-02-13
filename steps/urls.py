@@ -12,4 +12,5 @@ urlpatterns = [
     url(r'^send_emails/$', views.send_emails, name='send_emails'),
     url(r'^increase_tester/$', views.increase_tester, name='increase_tester'),
     url(r'^get_tester/$', views.get_tester, name='get_tester'),
+    url(r'^get_time/$', views.get_time, name='get_time'),
 ]

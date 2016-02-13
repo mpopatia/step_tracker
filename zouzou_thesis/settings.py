@@ -144,7 +144,7 @@ STATIC_URL = '/static/'
 # Parse database configuration from $DATABASE_URL
 if 'ONHEROKU' in os.environ:
     import dj_database_url
-    DATABASES['default'] =  dj_database_url.config(default='postgres://kulmwmbwfznqiz:tFOQZjHxzkc5SAJs8cyy0KtZds@ec2-107-20-136-89.compute-1.amazonaws.com:5432/dcs38705okbe1u')
+    DATABASES['default'] = dj_database_url.config(default='postgres://kulmwmbwfznqiz:tFOQZjHxzkc5SAJs8cyy0KtZds@ec2-107-20-136-89.compute-1.amazonaws.com:5432/dcs38705okbe1u')
 
 
 EMAIL_HOST = 'smtp.gmail.com'

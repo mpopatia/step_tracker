@@ -12,10 +12,11 @@ from django.conf import settings
 
 # Create your views here.
 
+email_threshold = 7
 
 # renders the index page
 def index(request):
-    date, day = get_date(10)
+    date, day = get_date(email_threshold)
     time = date.strftime('%d/%m/%Y')
 
     if request.user.is_authenticated():
@@ -48,7 +49,7 @@ def login_view(request):
         else:
             return HttpResponse("Disabled account")
     else:
-        return HttpResponse("Invalid login")
+        return HttpResponse("Invalid login. Please navigate back and retry.")
 
 
 # creates a new user
@@ -72,7 +73,7 @@ def success(request):
 def store_steps(request):
     steps = int(escape(strip_tags(request.GET['step_count'])))
     print "STEPS:",steps
-    (date, day) = get_date(10)
+    (date, day) = get_date(email_threshold)
     s = get_user_steps(request.user, date)
     if s is None:
         s = StepCount(owner=request.user, dateCreated=date, steps=steps)
@@ -97,8 +98,8 @@ def get_user_steps(user, date):
 # returns the date for which data is being entered
 def get_date(threshold):
     now = datetime.now()
-    today_threshold_am = now.replace(hour=threshold, minute=0, second=0, microsecond=0)
-    if now < today_threshold_am:
+    today_threshold = now.replace(hour=threshold, minute=0, second=0, microsecond=0)
+    if now < today_threshold:
         time = date.today() - timedelta(days=1)
         day = "yesterday"
     else:
@@ -107,34 +108,46 @@ def get_date(threshold):
 
     return time, day
 
+
 # send emails to all groups
 def send_emails(request):
 
-    date, day = get_date(10)
+    now = datetime.now()
+    low = now.replace(hour=email_threshold, minute=10, second=0, microsecond=0)
+    high = now.replace(hour=email_threshold+1, minute=40, second=0, microsecond=0)
 
-    emails = EmailCounter.objects.filter(dateCreated=date)
+    if now <= low:
+        return HttpResponse("It is not time yet. It is: "+str(now))
+
+    if now > high:
+        return HttpResponse("The time has passed. It is: "+str(now))
+
+    date_created = date.today() - timedelta(days=1)
+
+    emails = EmailCounter.objects.filter(dateCreated=date_created)
     if emails:
-        return HttpResponse("Already sent out emails for " + date.strftime('%d/%m/%Y'))
+        return HttpResponse("Already sent out emails for " + date_created.strftime('%d/%m/%Y'))
     else:
-        e = EmailCounter(dateCreated=date)
+        e = EmailCounter(dateCreated=date_created)
         e.save()
 
-    # one, two, three = separate()
+    one, two, three = separate()
 
-    # print one
-    # to_email_one = email_one(one)
-    # print to_email_one
-    # send_mass_mail(to_email_one)
+    # print "ONE", one
+    to_email_one = email_one(one)
+    # print "EMAILING", to_email_one
+    send_mass_mail(to_email_one)
 
-    # print two
-    # to_email_two = email_two(two)
+    # print "TWO", two
+    to_email_two = email_two(two)
     # print "EMAILING", to_email_two
-    # send_mass_mail(to_email_two)
+    send_mass_mail(to_email_two)
 
-    # print three
-    # to_email_two = email_two(two)
-    # print "EMAILING", to_email_two
-    # send_mass_mail(to_email_two)
+    # print "Three", three
+    to_email_three = email_three(three)
+    # print "EMAILING", to_email_three
+    send_mass_mail(to_email_three)
+
     return HttpResponse("Done!")
 
 
@@ -158,7 +171,9 @@ def separate():
             three.append(u)
 
     two = create_pairs(two)
+
     three = create_sorted_pairs(three)
+
     return one, two, three
 
 
@@ -181,7 +196,7 @@ def create_sorted_pairs(users):
     def pair_step_counter(tup):
         one = tup[0]
         two = tup[1]
-        (date, day) = get_date(10)
+        (date, day) = get_date(email_threshold)
         one_steps = get_user_steps(one, date)
         two_steps = get_user_steps(two, date)
         count = 0
@@ -193,8 +208,7 @@ def create_sorted_pairs(users):
 
     users = create_pairs(users)
     steps_combined = map(pair_step_counter, users)
-    print "STEPS",steps_combined
-    steps_combined.sort(key=lambda tup: tup[0])
+    steps_combined.sort(key=lambda tup: tup[0], reverse=True)
     ans = map(lambda (x,y): y, steps_combined)
     return ans
 
@@ -202,7 +216,7 @@ def create_sorted_pairs(users):
 # generates email responses for group 1
 def email_one(users):
     data = []
-    (date, day) = get_date(10)
+    (date, day) = get_date(email_threshold)
     date_str = date.strftime('%d/%m/%Y')
     subject = "Steps update for " + date_str
     for u in users:
@@ -224,7 +238,7 @@ def email_one(users):
 # generates email responses for group 2
 def email_two(users):
     data = []
-    (date, day) = get_date(10)
+    (date, day) = get_date(email_threshold)
     date_str = date.strftime('%d/%m/%Y')
     subject = "Steps update for " + date_str
     for u in users:
@@ -293,7 +307,7 @@ def email_two(users):
 # generates email responses for group 3
 def email_three(users):
     data = []
-    (date, day) = get_date(10)
+    (date, day) = get_date(email_threshold)
     date_str = date.strftime('%d/%m/%Y')
     subject = "Steps update for " + date_str
     for i in xrange(len(users)):
@@ -327,34 +341,19 @@ def email_three(users):
                     message = "Dear User "+ u1.username + ", you did not complete your goal with a total of just " + str(s1.steps) + " steps for " + date_str +". Your rank was " + str(i+1) + "."
                     data.append((subject, message, settings.EMAIL_HOST_USER, [u1.email]))
             else:
-                if s1.steps > s2.steps:
-                    if s1.steps >= 10000:
-                        message = "Congratulations User " + u1.username + ", you have completed your goal with a total of " + str(s1.steps) + " steps for " + date_str +". Your rank was " + str(i+1) + "."
-                        data.append((subject, message, settings.EMAIL_HOST_USER, [u1.email]))
-                    if s1.steps < 10000:
-                        message = "Dear User "+ u1.username + ", you did not complete your goal with a total of just " + str(s1.steps) + " steps for " + date_str +". Your rank was " + str(i+1) + "."
-                        data.append((subject, message, settings.EMAIL_HOST_USER, [u1.email]))
+                if s1.steps >= 10000:
+                    message = "Congratulations User " + u1.username + ", you have completed your goal with a total of " + str(s1.steps) + " steps for " + date_str +". Your rank was " + str(i+1) + "."
+                    data.append((subject, message, settings.EMAIL_HOST_USER, [u1.email]))
+                if s1.steps < 10000:
+                    message = "Dear User "+ u1.username + ", you did not complete your goal with a total of just " + str(s1.steps) + " steps for " + date_str +". Your rank was " + str(i+1) + "."
+                    data.append((subject, message, settings.EMAIL_HOST_USER, [u1.email]))
 
-                    if s2.steps >= 10000:
-                        message = "Congratulations User " + u2.username + ", you have completed your goal with a total of " + str(s2.steps) + " steps for " + date_str +". Your rank was " + str(i+1) + "."
-                        data.append((subject, message, settings.EMAIL_HOST_USER, [u2.email]))
-                    if s2.steps < 10000:
-                        message = "Dear User "+ u2.username + ", you did not complete your goal with a total of just " + str(s2.steps) + " steps for " + date_str +". Your rank was " + str(i+1) + "."
-                        data.append((subject, message, settings.EMAIL_HOST_USER, [u2.email]))
-                else:
-                    if s1.steps >= 10000:
-                        message = "Congratulations User " + u1.username + ", you completed your goal with a total of " + str(s1.steps) + " steps for " + date_str +". Your rank was " + str(i+1) + "."
-                        data.append((subject, message, settings.EMAIL_HOST_USER, [u1.email]))
-                    if s1.steps < 10000:
-                        message = "Dear User "+ u1.username + ", you did not complete your goal with a total of just " + str(s1.steps) + " steps for " + date_str +". Your rank was " + str(i+1) + "."
-                        data.append((subject, message, settings.EMAIL_HOST_USER, [u1.email]))
-
-                    if s2.steps >= 10000:
-                        message = "Congratulations User " + u2.username + ", you have completed your goal with a total of " + str(s2.steps) + " steps for " + date_str +". Your rank was " + str(i+1) + "."
-                        data.append((subject, message, settings.EMAIL_HOST_USER, [u2.email]))
-                    if s2.steps < 10000:
-                        message = "Dear User "+ u2.username + ", you did not complete your goal with a total of just " + str(s2.steps) + " steps for " + date_str +". Your rank was " + str(i+1) + "."
-                        data.append((subject, message, settings.EMAIL_HOST_USER, [u2.email]))
+                if s2.steps >= 10000:
+                    message = "Congratulations User " + u2.username + ", you have completed your goal with a total of " + str(s2.steps) + " steps for " + date_str +". Your rank was " + str(i+1) + "."
+                    data.append((subject, message, settings.EMAIL_HOST_USER, [u2.email]))
+                if s2.steps < 10000:
+                    message = "Dear User "+ u2.username + ", you did not complete your goal with a total of just " + str(s2.steps) + " steps for " + date_str +". Your rank was " + str(i+1) + "."
+                    data.append((subject, message, settings.EMAIL_HOST_USER, [u2.email]))
 
     data = tuple(data)
     return data
@@ -373,8 +372,13 @@ def increase_tester(request):
 
 
 def get_tester(request):
-    all = Tester.objects.all()
-    if all:
-        return HttpResponse(all[0].count)
+    all_tester = Tester.objects.all()
+    if all_tester:
+        return HttpResponse(all_tester[0].count)
     else:
         return HttpResponse(0)
+
+
+def get_time(request):
+    print get_date(email_threshold)
+    return HttpResponse(str(datetime.now()))
