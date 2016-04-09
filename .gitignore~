@@ -1,3 +1,4 @@
 *.pyc
 zouzou_thesis/private.py
-/.idea
+.idea/
+.gitignore~
