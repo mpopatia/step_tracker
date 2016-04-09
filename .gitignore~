@@ -1,2 +1,3 @@
 *.pyc
-zouzou_thesis/secure.py
+zouzou_thesis/private.py
+/.idea
